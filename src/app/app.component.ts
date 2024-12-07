@@ -1,10 +1,12 @@
 import { Component } from '@angular/core';
+import { DrawingComponent } from './drawing/drawing.component';
 
 @Component({
   selector: 'app-root',
-  imports: [],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+  styleUrls: ['./app.component.css'],
+  standalone: true,
+  imports: [DrawingComponent]
 })
 export class AppComponent {
   title = 'drawing-app';

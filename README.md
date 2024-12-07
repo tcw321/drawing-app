@@ -1,6 +1,34 @@
-# DrawingApp
+# Angular Drawing App
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.0.4.
+## Overview
+A simple drawing application built with Angular that allows users to draw freehand on a canvas with color selection.
+
+## Features
+- Freehand drawing
+- Color picker
+- Clear canvas functionality
+
+## Getting Started
+
+### Prerequisites
+- Node.js (v16+)
+- Angular CLI
+
+### Installation
+1. Clone the repository
+2. Run `npm install`
+3. Run `ng serve`
+4. Open `http://localhost:4200/` in your browser
+
+## Usage
+- Use the color picker to select drawing color
+- Click and drag on the canvas to draw
+- Click "Clear Canvas" to reset the drawing
+
+## Technologies
+- Angular
+- TypeScript
+- HTML5 Canvas
 
 ## Development server
 
