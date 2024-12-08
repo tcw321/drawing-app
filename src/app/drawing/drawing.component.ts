@@ -15,10 +15,12 @@ export class DrawingComponent implements OnInit {
   
   isDrawing = false;
   currentColor = '#000000';
+  lineWidth = 2;
   
   ngOnInit() {
-    this.context = this.canvas.nativeElement.getContext('2d')!;
-    this.context.lineWidth = 2;
+    const canvas = this.canvas.nativeElement;
+    this.context = canvas.getContext('2d')!;
+    this.context.lineWidth = this.lineWidth;
     this.context.lineCap = 'round';
   }
   
@@ -50,6 +52,14 @@ export class DrawingComponent implements OnInit {
   updateColor(event: Event) {
     const input = event.target as HTMLInputElement;
     this.currentColor = input.value;
+  }
+  
+  updateLineWidth(event: Event) {
+    const input = event.target as HTMLInputElement;
+    this.lineWidth = parseInt(input.value);
+    if (this.context) {
+      this.context.lineWidth = this.lineWidth;
+    }
   }
   
   clearCanvas() {

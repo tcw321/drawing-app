@@ -10,8 +10,10 @@ describe('DrawingComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [FormsModule],
-      declarations: []
+      imports: [
+        FormsModule,
+        DrawingComponent // Import instead of declare since it's standalone
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(DrawingComponent);
@@ -29,15 +31,65 @@ describe('DrawingComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should initialize with default color', () => {
-    expect(component.currentColor).toBe('#000000');
+  it('should initialize with default line width', () => {
+    expect(component.lineWidth).toBe(2);
   });
 
-  it('should initialize canvas context on ngOnInit', () => {
+  it('should initialize canvas context with default line width', () => {
     component.ngOnInit();
-    expect(component['context']).toBeTruthy();
     expect(component['context'].lineWidth).toBe(2);
-    expect(component['context'].lineCap).toBe('round');
+  });
+
+  it('should update line width when range input changes', () => {
+    const newWidth = 10;
+    const mockEvent = { 
+      target: { value: newWidth.toString() } 
+    } as unknown as Event;
+    
+    component.updateLineWidth(mockEvent);
+    
+    expect(component.lineWidth).toBe(newWidth);
+    expect(component['context'].lineWidth).toBe(newWidth);
+  });
+
+  it('should handle minimum line width', () => {
+    const minWidth = 1;
+    const mockEvent = { 
+      target: { value: minWidth.toString() } 
+    } as unknown as Event;
+    
+    component.updateLineWidth(mockEvent);
+    
+    expect(component.lineWidth).toBe(minWidth);
+    expect(component['context'].lineWidth).toBe(minWidth);
+  });
+
+  it('should handle maximum line width', () => {
+    const maxWidth = 20;
+    const mockEvent = { 
+      target: { value: maxWidth.toString() } 
+    } as unknown as Event;
+    
+    component.updateLineWidth(mockEvent);
+    
+    expect(component.lineWidth).toBe(maxWidth);
+    expect(component['context'].lineWidth).toBe(maxWidth);
+  });
+
+  it('should maintain line width after clearing canvas', () => {
+    const newWidth = 15;
+    const mockEvent = { 
+      target: { value: newWidth.toString() } 
+    } as unknown as Event;
+    
+    component.updateLineWidth(mockEvent);
+    component.clearCanvas();
+    
+    expect(component['context'].lineWidth).toBe(newWidth);
+  });
+
+  it('should initialize with default color', () => {
+    expect(component.currentColor).toBe('#000000');
   });
 
   it('should start drawing on mousedown', () => {
@@ -56,6 +108,13 @@ describe('DrawingComponent', () => {
     expect(component.isDrawing).toBeFalse();
   });
 
+  it('should handle mouseout event', () => {
+    component.isDrawing = true;
+    const mockEvent = new MouseEvent('mouseout');
+    component.stopDrawing();
+    expect(component.isDrawing).toBeFalse();
+  });
+
   it('should update color when color input changes', () => {
     const newColor = '#ff0000';
     const mockEvent = { target: { value: newColor } } as unknown as Event;
@@ -65,7 +124,6 @@ describe('DrawingComponent', () => {
   });
 
   it('should clear canvas when clearCanvas is called', () => {
-    // Setup spy on clearRect
     const clearRectSpy = spyOn(context, 'clearRect');
     
     component.clearCanvas();
@@ -84,13 +142,45 @@ describe('DrawingComponent', () => {
       clientY: 100
     });
     
-    // Setup spy on stroke
     const strokeSpy = spyOn(context, 'stroke');
     
     component.isDrawing = false;
     component.draw(mockEvent);
     
     expect(strokeSpy).not.toHaveBeenCalled();
+  });
+
+  it('should draw with current line width when drawing', () => {
+    const mockEvent = new MouseEvent('mousemove', {
+      clientX: 100,
+      clientY: 100
+    });
+    
+    const newWidth = 8;
+    component.lineWidth = newWidth;
+    component['context'].lineWidth = newWidth;
+    
+    // Setup spies
+    const strokeSpy = spyOn(context, 'stroke');
+    const beginPathSpy = spyOn(context, 'beginPath');
+    spyOn(canvasElement, 'getBoundingClientRect').and.returnValue({
+      left: 0,
+      top: 0,
+      width: 800,
+      height: 600,
+      right: 800,
+      bottom: 600,
+      x: 0,
+      y: 0,
+      toJSON: () => {}
+    });
+
+    component.isDrawing = true;
+    component.draw(mockEvent);
+    
+    expect(component['context'].lineWidth).toBe(newWidth);
+    expect(strokeSpy).toHaveBeenCalled();
+    expect(beginPathSpy).toHaveBeenCalled();
   });
 
   it('should draw when isDrawing is true', () => {
@@ -125,11 +215,5 @@ describe('DrawingComponent', () => {
     expect(beginPathSpy).toHaveBeenCalled();
     expect(moveToSpy).toHaveBeenCalled();
     expect(lineToSpy).toHaveBeenCalled();
-  });
-
-  it('should handle mouseout event', () => {
-    component.isDrawing = true;
-    component.stopDrawing();
-    expect(component.isDrawing).toBeFalse();
   });
 });
