@@ -63,6 +63,32 @@ button:hover {
   background-color: #f50057;
 }
 
+.mode-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.mode-buttons button {
+  padding: 6px 12px;
+  background-color: #f0f0f0;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.mode-buttons button.active {
+  background-color: #ff4081;
+  color: white;
+  border-color: #ff4081;
+}
+
+.mode-buttons button:hover:not(.active) {
+  background-color: #e0e0e0;
+}
+
 canvas {
   border: 1px solid #ddd;
   border-radius: 4px;

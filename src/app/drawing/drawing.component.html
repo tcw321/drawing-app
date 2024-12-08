@@ -23,6 +23,24 @@
       <span class="line-width-value">{{lineWidth}}px</span>
     </div>
 
+    <div class="control-group">
+      <label>Drawing Mode:</label>
+      <div class="mode-buttons">
+        <button 
+          [class.active]="drawingMode === 'freehand'"
+          (click)="setDrawingMode('freehand')" 
+          aria-label="Freehand drawing mode">
+          Freehand
+        </button>
+        <button 
+          [class.active]="drawingMode === 'line'"
+          (click)="setDrawingMode('line')" 
+          aria-label="Straight line mode">
+          Line
+        </button>
+      </div>
+    </div>
+
     <button (click)="clearCanvas()" aria-label="Clear canvas">Clear Canvas</button>
   </nav>
   <canvas 

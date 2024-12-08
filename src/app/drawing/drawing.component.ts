@@ -1,21 +1,23 @@
 import { Component, ViewChild, ElementRef, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-drawing',
-  templateUrl: './drawing.component.html',
-  styleUrls: ['./drawing.component.css'],
   standalone: true,
-  imports: [FormsModule]
+  imports: [FormsModule, CommonModule],
+  templateUrl: './drawing.component.html',
+  styleUrls: ['./drawing.component.css']
 })
 export class DrawingComponent implements OnInit {
-  @ViewChild('drawingCanvas', { static: true }) canvas!: ElementRef<HTMLCanvasElement>;
-  
+  @ViewChild('drawingCanvas') canvas!: ElementRef<HTMLCanvasElement>;
   private context!: CanvasRenderingContext2D;
+  private startPoint: { x: number; y: number } | null = null;
   
   isDrawing = false;
   currentColor = '#000000';
   lineWidth = 2;
+  drawingMode: 'freehand' | 'line' = 'freehand';
   
   ngOnInit() {
     const canvas = this.canvas.nativeElement;
@@ -25,28 +27,46 @@ export class DrawingComponent implements OnInit {
   }
   
   startDrawing(event: MouseEvent) {
+    const rect = this.canvas.nativeElement.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+
     this.isDrawing = true;
-    this.draw(event);
+    this.context.beginPath();
+    this.context.moveTo(x, y);
+
+    if (this.drawingMode === 'line') {
+      this.startPoint = { x, y };
+    }
   }
   
   draw(event: MouseEvent) {
     if (!this.isDrawing) return;
     
-    const canvas = this.canvas.nativeElement;
-    const rect = canvas.getBoundingClientRect();
+    const rect = this.canvas.nativeElement.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
-    
-    this.context.lineTo(x, y);
-    this.context.strokeStyle = this.currentColor;
-    this.context.stroke();
-    this.context.beginPath();
-    this.context.moveTo(x, y);
+
+    if (this.drawingMode === 'freehand') {
+      this.context.lineTo(x, y);
+      this.context.stroke();
+    } else if (this.drawingMode === 'line' && this.startPoint) {
+      // Clear the canvas to remove the preview line
+      const imageData = this.context.getImageData(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
+      this.context.clearRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
+      this.context.putImageData(imageData, 0, 0);
+
+      // Draw the preview line
+      this.context.beginPath();
+      this.context.moveTo(this.startPoint.x, this.startPoint.y);
+      this.context.lineTo(x, y);
+      this.context.stroke();
+    }
   }
   
   stopDrawing() {
     this.isDrawing = false;
-    this.context.beginPath();
+    this.startPoint = null;
   }
   
   updateColor(event: Event) {
@@ -60,6 +80,10 @@ export class DrawingComponent implements OnInit {
     if (this.context) {
       this.context.lineWidth = this.lineWidth;
     }
+  }
+
+  setDrawingMode(mode: 'freehand' | 'line') {
+    this.drawingMode = mode;
   }
   
   clearCanvas() {
