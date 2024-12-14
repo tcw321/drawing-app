@@ -36,7 +36,7 @@ describe('DrawingComponent', () => {
   });
 
   it('should initialize canvas context with default line width', () => {
-    component.ngOnInit();
+    component.ngAfterViewInit();
     expect(component['context'].lineWidth).toBe(2);
   });
 
@@ -124,7 +124,7 @@ describe('DrawingComponent', () => {
   });
 
   it('should clear canvas when clearCanvas is called', () => {
-    const clearRectSpy = spyOn(context, 'clearRect');
+    const clearRectSpy = spyOn((component as any)['context'], 'clearRect');
     
     component.clearCanvas();
     
@@ -161,8 +161,8 @@ describe('DrawingComponent', () => {
     component['context'].lineWidth = newWidth;
     
     // Setup spies
-    const strokeSpy = spyOn(context, 'stroke');
-    const beginPathSpy = spyOn(context, 'beginPath');
+    const strokeSpy = spyOn((component as any)['context'], 'stroke');
+    const beginPathSpy = spyOn((component as any)['context'], 'beginPath');
     spyOn(canvasElement, 'getBoundingClientRect').and.returnValue({
       left: 0,
       top: 0,
@@ -189,11 +189,14 @@ describe('DrawingComponent', () => {
       clientY: 100
     });
     
-    // Setup spies
-    const strokeSpy = spyOn(context, 'stroke');
-    const beginPathSpy = spyOn(context, 'beginPath');
-    const moveToSpy = spyOn(context, 'moveTo');
-    const lineToSpy = spyOn(context, 'lineTo');
+    // Initialize the component's context first
+    component.ngAfterViewInit();
+    
+    // Setup spies on the component's context
+    const strokeSpy = spyOn((component as any)['context'], 'stroke');
+    const beginPathSpy = spyOn((component as any)['context'], 'beginPath');
+    const moveToSpy = spyOn((component as any)['context'], 'moveTo');
+    const lineToSpy = spyOn((component as any)['context'], 'lineTo');
     
     // Mock getBoundingClientRect
     spyOn(canvasElement, 'getBoundingClientRect').and.returnValue({
@@ -207,9 +210,9 @@ describe('DrawingComponent', () => {
       y: 0,
       toJSON: () => {}
     });
-
-    component.isDrawing = true;
-    component.draw(mockEvent);
+    
+    // Start drawing
+    component.startDrawing(mockEvent);
     
     expect(strokeSpy).toHaveBeenCalled();
     expect(beginPathSpy).toHaveBeenCalled();
