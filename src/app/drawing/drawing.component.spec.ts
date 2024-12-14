@@ -142,7 +142,7 @@ describe('DrawingComponent', () => {
       clientY: 100
     });
     
-    const strokeSpy = spyOn(context, 'stroke');
+    const strokeSpy = spyOn((component as any)['context'], 'stroke');
     
     component.isDrawing = false;
     component.draw(mockEvent);
