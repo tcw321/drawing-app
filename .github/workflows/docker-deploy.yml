@@ -42,11 +42,11 @@ jobs:
       uses: shimataro/ssh-key-action@v2
       with:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
-        known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+        known_hosts: unnecessary
 
     - name: Deploy to host
       run: |
-        ssh ${{ env.HOST_USER }}@${{ env.HOST_IP }} "
+        ssh -o StrictHostKeyChecking=no${{ env.HOST_USER }}@${{ env.HOST_IP }} "
           # Pull the latest image
           docker pull ${{ env.DOCKER_IMAGE }}:latest
 
