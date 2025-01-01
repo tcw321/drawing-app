@@ -44,12 +44,12 @@ jobs:
     - name: Configure SSH
       run : |
         mkdir -p ~/.ssh
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
-        chmod 600 ~/.ssh/deploy_key
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/the_key  
+        chmod 600 ~/.ssh/the_key
         ssh-keyscan -H ${{ env.HOST_IP }} >> ~/.ssh/known_hosts
         eval "$(ssh-agent -s)"
         expect << 'DONE'
-          spawn ssh-add ~/.ssh/deploy_key
+          spawn ssh-add ~/.ssh/the_key
           expect "Enter passphrase"
           send "${{ secrets.SSH_PASSPHRASE }}\n"
           expect eof
