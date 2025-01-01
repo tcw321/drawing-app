@@ -44,10 +44,12 @@ jobs:
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
         chmod 600 ~/.ssh/deploy_key
         ssh-keyscan -H ${{ env.HOST_IP }} >> ~/.ssh/known_hosts
+        eval "$(ssh-agent -s)"
+        echo "${{ secrets.SSH_PASSPHRASE }}" | ssh-add ~/.ssh/deploy_key
 
     - name: Deploy to host
       run: |
-        ssh -i ~/.ssh/deploy_key ${{ env.HOST_USER }}@${{ env.HOST_IP }} "
+        ssh ${{ env.HOST_USER }}@${{ env.HOST_IP }} "
           # Pull the latest image
           docker pull ${{ env.DOCKER_IMAGE }}:latest
 
