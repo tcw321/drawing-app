@@ -18,6 +18,9 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    - name: Install expect
+      run: sudo apt-get update && sudo apt-get install -y expect
+
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
@@ -45,7 +48,12 @@ jobs:
         chmod 600 ~/.ssh/deploy_key
         ssh-keyscan -H ${{ env.HOST_IP }} >> ~/.ssh/known_hosts
         eval "$(ssh-agent -s)"
-        echo "${{ secrets.SSH_PASSPHRASE }}" | ssh-add ~/.ssh/deploy_key
+        expect << 'DONE'
+          spawn ssh-add ~/.ssh/deploy_key
+          expect "Enter passphrase"
+          send "${{ secrets.SSH_PASSPHRASE }}\n"
+          expect eof
+        DONE
 
     - name: Deploy to host
       run: |
