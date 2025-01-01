@@ -46,7 +46,7 @@ jobs:
 
     - name: Deploy to host
       run: |
-        ssh -o StrictHostKeyChecking=no${{ env.HOST_USER }}@${{ env.HOST_IP }} "
+        ssh -o StrictHostKeyChecking=no ${{ env.HOST_USER }}@${{ env.HOST_IP }} "
           # Pull the latest image
           docker pull ${{ env.DOCKER_IMAGE }}:latest
 
