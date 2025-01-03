@@ -99,6 +99,22 @@ jobs:
           # Start containers with new image
           docker-compose up -d
           
+          # Check if containers are running
+          echo "Checking container status..."
+          docker ps
+          
+          # Check logs for any errors
+          echo "Checking drawing-app container logs..."
+          docker-compose logs drawing-app
+          
+          # Verify nginx is running in the container
+          echo "Checking nginx process..."
+          docker exec drawing-app-drawing-app-1 ps aux | grep nginx
+          
+          # Check if ports are properly bound
+          echo "Checking port bindings..."
+          netstat -tulpn | grep -E ':80|:443'
+          
           # Remove old, unused images to free up space
           docker image prune -f
           
@@ -109,3 +125,7 @@ jobs:
           if [ ! -d "./certbot/conf/live/tcw321.net" ]; then
             ./init-letsencrypt.sh
           fi
+          
+          # Final status check
+          echo "Final container status:"
+          docker-compose ps
