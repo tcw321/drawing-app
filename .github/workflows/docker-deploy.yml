@@ -64,7 +64,7 @@ jobs:
         host: ${{ secrets.HOST_IP }}
         username: ${{ secrets.HOST_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
-        source: "docker-compose.yml,nginx/ssl.conf,init-letsencrypt.sh"
+        source: "docker-compose.yml,nginx/ssl.conf,init-letsencrypt.sh,nginx/temp.conf"
         target: "~/drawing-app"
         strip_components: 0
 
