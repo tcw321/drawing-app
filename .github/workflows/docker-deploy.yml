@@ -89,11 +89,12 @@ jobs:
           # Make init-letsencrypt.sh executable
           chmod +x init-letsencrypt.sh
           
+          # Stop all containers first and wait
+          docker-compose down --remove-orphans
+          sleep 5  # Give time for ports to be properly released
+          
           # Pull the new image
           docker-compose pull
-          
-          # Stop and remove existing containers (but keep volumes)
-          docker-compose down --remove-orphans
           
           # Start containers with new image
           docker-compose up -d
