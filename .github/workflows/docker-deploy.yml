@@ -88,11 +88,13 @@ jobs:
           
           # Stop all containers
           docker-compose down --remove-orphans
+          docker network prune -f
           sleep 5
           
           # Get SSL certificate if it doesn't exist
           if [ ! -d "./certbot/conf/live/tcw321.net" ]; then
             echo "Obtaining SSL certificate..."
+            # Try with verbose output for better error information
             docker-compose run --rm --entrypoint "\
               certbot certonly --standalone \
                 --email tim08162016@gmail.com \
@@ -100,7 +102,8 @@ jobs:
                 --rsa-key-size 4096 \
                 --agree-tos \
                 --force-renewal \
-                --non-interactive" certbot
+                --non-interactive \
+                -v" certbot
           fi
           
           # Pull and start containers
@@ -120,3 +123,7 @@ jobs:
           # Check certificate status
           docker-compose run --rm --entrypoint "\
             certbot certificates" certbot
+            
+          # Final connectivity test
+          echo "Testing final connectivity..."
+          curl -v http://tcw321.net
