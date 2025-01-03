@@ -77,8 +77,8 @@ jobs:
         script: |
           cd ~/drawing-app
           
-          # Login to Docker Hub
-          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+          # Login to Docker Hub without storing credentials
+          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login --username "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin --config /dev/null
           
           # Set environment variable for docker-compose
           export DOCKER_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/drawing-app"
@@ -93,7 +93,7 @@ jobs:
           docker-compose pull
           docker-compose up -d
           
-          # Logout from Docker Hub for security
+          # Cleanup Docker login
           docker logout
           
           # Initialize SSL if needed
