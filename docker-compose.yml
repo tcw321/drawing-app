@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   drawing-app:
-    image: ${DOCKER_IMAGE:-${{ secrets.DOCKERHUB_USERNAME }}/drawing-app}:latest
+    image: ${DOCKER_IMAGE}:latest
     ports:
       - "80:80"
       - "443:443"

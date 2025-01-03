@@ -80,8 +80,8 @@ jobs:
           # Login to Docker Hub without storing credentials
           echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login --username "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin --config /dev/null
           
-          # Set environment variable for docker-compose
-          export DOCKER_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/drawing-app"
+          # Create .env file for docker-compose
+          echo "DOCKER_IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/drawing-app" > .env
           
           # Create required directories
           mkdir -p certbot/conf certbot/www
@@ -89,9 +89,17 @@ jobs:
           # Make init-letsencrypt.sh executable
           chmod +x init-letsencrypt.sh
           
-          # Pull and start containers
+          # Pull the new image
           docker-compose pull
+          
+          # Stop and remove existing containers (but keep volumes)
+          docker-compose down --remove-orphans
+          
+          # Start containers with new image
           docker-compose up -d
+          
+          # Remove old, unused images to free up space
+          docker image prune -f
           
           # Cleanup Docker login
           docker logout
