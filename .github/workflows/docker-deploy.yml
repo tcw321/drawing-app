@@ -3,7 +3,7 @@ name: Docker Build and Deploy
 on:
   push:
     branches:
-      - main  # or master, depending on your default branch name
+      - main
 
 env:
   DOCKER_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/drawing-app
@@ -58,6 +58,16 @@ jobs:
         cache-from: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache
         cache-to: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache,mode=max
 
+    - name: Copy config files and deploy
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.HOST_IP }}
+        username: ${{ secrets.HOST_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        source: "docker-compose.yml,nginx/ssl.conf,init-letsencrypt.sh"
+        target: "~/drawing-app"
+        strip_components: 0
+
     - name: Deploy to server
       uses: appleboy/ssh-action@master
       with:
@@ -65,44 +75,27 @@ jobs:
         username: ${{ secrets.HOST_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
-
-          # Create app directory if it doesn't exist
-          mkdir -p ~/drawing-app
           cd ~/drawing-app
-
+          
           # Login to Docker Hub
           echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
-
+          
           # Set environment variable for docker-compose
           export DOCKER_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/drawing-app"
-
-
-          # Copy necessary files
-          cat > docker-compose.yml << 'EOL'
-          $(cat docker-compose.yml)
-          EOL
-
-          cat > nginx/ssl.conf << 'EOL'
-          $(cat nginx/ssl.conf)
-          EOL
-
-          cat > init-letsencrypt.sh << 'EOL'
-          $(cat init-letsencrypt.sh)
-          EOL
-
-          # Make init-letsencrypt.sh executable
-          chmod +x init-letsencrypt.sh
-
+          
           # Create required directories
           mkdir -p certbot/conf certbot/www
-
+          
+          # Make init-letsencrypt.sh executable
+          chmod +x init-letsencrypt.sh
+          
           # Pull and start containers
           docker-compose pull
           docker-compose up -d
-
+          
           # Logout from Docker Hub for security
           docker logout
-
+          
           # Initialize SSL if needed
           if [ ! -d "./certbot/conf/live/tcw321.net" ]; then
             ./init-letsencrypt.sh
