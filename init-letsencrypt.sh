@@ -31,10 +31,6 @@ docker-compose run --rm --entrypoint "\
     -subj '/CN=localhost'" certbot
 echo
 
-echo "### Starting nginx ..."
-docker-compose up --force-recreate -d drawing-app
-echo
-
 echo "### Deleting dummy certificate for $domains ..."
 docker-compose run --rm --entrypoint "\
   rm -Rf /etc/letsencrypt/live/$domains && \
@@ -67,6 +63,9 @@ docker-compose run --rm --entrypoint "\
     --agree-tos \
     --force-renewal" certbot
 echo
+
+echo "### Copying SSL configuration ..."
+cp ./nginx/ssl.conf ./nginx/temp.conf
 
 echo "### Reloading nginx ..."
 docker-compose exec drawing-app nginx -s reload
