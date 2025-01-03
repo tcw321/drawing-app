@@ -86,46 +86,37 @@ jobs:
           # Create required directories
           mkdir -p certbot/conf certbot/www
           
-          # Make init-letsencrypt.sh executable
-          chmod +x init-letsencrypt.sh
-          
-          # Stop all containers first and wait
+          # Stop all containers
           docker-compose down --remove-orphans
-          sleep 5  # Give time for ports to be properly released
+          sleep 5
           
-          # Pull the new image
+          # Get SSL certificate if it doesn't exist
+          if [ ! -d "./certbot/conf/live/tcw321.net" ]; then
+            echo "Obtaining SSL certificate..."
+            docker-compose run --rm --entrypoint "\
+              certbot certonly --standalone \
+                --email tim08162016@gmail.com \
+                -d tcw321.net \
+                --rsa-key-size 4096 \
+                --agree-tos \
+                --force-renewal \
+                --non-interactive" certbot
+          fi
+          
+          # Pull and start containers
           docker-compose pull
-          
-          # Start containers with new image
           docker-compose up -d
           
-          # Check if containers are running
-          echo "Checking container status..."
-          docker ps
-          
-          # Check logs for any errors
-          echo "Checking drawing-app container logs..."
-          docker-compose logs drawing-app
-          
-          # Verify nginx is running in the container
-          echo "Checking nginx process..."
-          docker exec drawing-app-drawing-app-1 ps aux | grep nginx
-          
-          # Check if ports are properly bound
-          echo "Checking port bindings..."
-          netstat -tulpn | grep -E ':80|:443'
-          
-          # Remove old, unused images to free up space
+          # Remove old images
           docker image prune -f
           
           # Cleanup Docker login
           docker logout
           
-          # Initialize SSL if needed
-          if [ ! -d "./certbot/conf/live/tcw321.net" ]; then
-            ./init-letsencrypt.sh
-          fi
-          
-          # Final status check
+          # Show final status
           echo "Final container status:"
           docker-compose ps
+          
+          # Check certificate status
+          docker-compose run --rm --entrypoint "\
+            certbot certificates" certbot
