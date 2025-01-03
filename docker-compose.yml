@@ -2,9 +2,7 @@ version: '3.8'
 
 services:
   drawing-app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ${DOCKER_IMAGE:-${{ secrets.DOCKERHUB_USERNAME }}/drawing-app}:latest
     ports:
       - "80:80"
       - "443:443"

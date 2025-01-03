@@ -94,6 +94,12 @@ jobs:
           mkdir -p ~/drawing-app
           cd ~/drawing-app
 
+          # Login to Docker Hub
+          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+          # Set environment variable for docker-compose
+          export DOCKER_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/drawing-app"
+
           # Install Docker if not installed
           if ! command -v docker &> /dev/null; then
             curl -fsSL https://get.docker.com -o get-docker.sh
@@ -129,6 +135,9 @@ jobs:
           # Pull and start containers
           docker-compose pull
           docker-compose up -d
+
+          # Logout from Docker Hub for security
+          docker logout
 
           # Initialize SSL if needed
           if [ ! -d "./certbot/conf/live/tcw321.net" ]; then
