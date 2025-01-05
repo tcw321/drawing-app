@@ -97,7 +97,7 @@ jobs:
             # Try with verbose output for better error information
             docker-compose run --rm --entrypoint "\
               certbot certonly --standalone \
-                --email tim08162016@gmail.com \
+                --email ${{ secrets.EMAIL }}\
                 -d tcw321.net \
                 --rsa-key-size 4096 \
                 --agree-tos \
