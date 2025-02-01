@@ -28,52 +28,62 @@ export class DrawingComponent implements AfterViewInit {
   }
   
   startDrawing(event: MouseEvent) { 
+    console.log('Start drawing');
     this.isDrawing = true;
-    if (this.drawingMode === 'line') {
-      this.startPoint = {
-        x: event.clientX,
-        y: event.clientY
-      };
+    const rect = this.canvas.nativeElement.getBoundingClientRect();
+    this.startPoint.x = event.clientX - rect.left;
+    this.startPoint.y = event.clientY - rect.top;
+    if (this.drawingMode === 'freehand') {
+      this.context.beginPath();
+      this.context.moveTo(this.startPoint.x, this.startPoint.y);
+    }
+    else if (this.drawingMode === 'line') {
+      this.lastImageData = this.context.getImageData(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height); // savedCanvas = this.context.getImageData(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
     }
   }
  
   draw(event: MouseEvent) {
-    if (!this.isDrawing ||
-      (this.drawingMode === 'line'))
-      {
-        this.context.beginPath();
-        if (this.drawingMode === 'line') {
-          const rect = this.canvas.nativeElement.getBoundingClientRect();
-          this.context.moveTo(this.startPoint.x - rect.left, this.startPoint.y - rect.top);
-          return;
-        }
-      }
+    if (!this.isDrawing) {
+      console.log('not drawing');
+      return;
+    }
+    console.log('drawing');
+
     const rect = this.canvas.nativeElement.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-  
-    this.context.lineTo(x, y);
-    this.context.strokeStyle = this.currentColor;
-    this.context.stroke();
-    this.context.beginPath();
-    this.context.moveTo(x, y);
-  
+    if (this.drawingMode === 'line')
+      {
+        this.context.putImageData(this.lastImageData!, 0, 0);
+        this.context.beginPath();
+        this.context.moveTo(this.startPoint.x, this.startPoint.y);
+        this.context.lineTo(event.clientX - rect.left, event.clientY - rect.top);
+        this.context.strokeStyle = this.currentColor;
+        this.context.stroke();
+      }
+    else {
+
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        this.context.strokeStyle = this.currentColor;
+      
+        this.context.lineTo(x, y);
+        this.context.stroke();}
   }
   
   stopDrawing(event: MouseEvent) {
     this.isDrawing = false;
+    console.log('Stop drawing');
+
     if (this.drawingMode === 'line' && this.startPoint) {
       const rect = this.canvas.nativeElement.getBoundingClientRect();
       const endX = event.clientX - rect.left;
       const endY = event.clientY - rect.top;
-      
+      this.context.putImageData(this.lastImageData!, 0, 0);
       this.context.beginPath();
-      this.context.moveTo(this.startPoint.x - rect.left, this.startPoint.y - rect.top);
+      this.context.moveTo(this.startPoint.x, this.startPoint.y);
       this.context.lineTo(endX, endY);
       this.context.strokeStyle = this.currentColor;
       this.context.stroke();
     }
-    this.startPoint = { x: 0, y: 0 };
   }
 
   
