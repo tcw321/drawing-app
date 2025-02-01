@@ -47,8 +47,8 @@
     #drawingCanvas 
     (mousedown)="startDrawing($event)"
     (mousemove)="draw($event)"
-    (mouseup)="stopDrawing()"
-    (mouseout)="stopDrawing()"
+    (mouseup)="stopDrawing($event)"
+    (mouseout)="stopDrawing($event)"
     width="800" 
     height="600"
     aria-label="Drawing canvas">
