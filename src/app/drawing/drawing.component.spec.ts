@@ -219,4 +219,59 @@ describe('DrawingComponent', () => {
     expect(beginPathSpy).toHaveBeenCalled();
     expect(moveToSpy).toHaveBeenCalled();
   });
+  it('should draw line when isDrawing is true in line mode', () => {
+    const mockEvent = new MouseEvent('mousemove', {
+      clientX: 100,
+      clientY: 100
+    });
+    
+    // Initialize the component's context first
+    component.ngAfterViewInit();
+    component.drawingMode = 'line';
+
+    // Setup spies on the component's context
+    const getImageDataSpy = spyOn((component as any)['context'], 'getImageData');
+    
+    // Mock getBoundingClientRect
+    spyOn(canvasElement, 'getBoundingClientRect').and.returnValue({
+      left: 0,
+      top: 0,
+      width: 800,
+      height: 600,
+      right: 800,
+      bottom: 600,
+      x: 0,
+      y: 0,
+      toJSON: () => {}
+    });
+    
+    // Start drawing
+    component.startDrawing(mockEvent);
+    
+    expect(getImageDataSpy).toHaveBeenCalled();
+  
+    const putImageDataSpy = spyOn((component as any)['context'], 'putImageData');
+    const beginPathSpy = spyOn((component as any)['context'], 'beginPath');
+    const moveToSpy = spyOn((component as any)['context'], 'moveTo');
+    const lineToSpy = spyOn((component as any)['context'], 'lineTo');
+    component.draw(mockEvent);
+  
+    expect(putImageDataSpy).toHaveBeenCalled();
+    expect(beginPathSpy).toHaveBeenCalled();
+    expect(moveToSpy).toHaveBeenCalled();
+    expect(lineToSpy).toHaveBeenCalled();
+
+    putImageDataSpy.calls.reset();
+    beginPathSpy.calls.reset();
+    moveToSpy.calls.reset();
+    lineToSpy.calls.reset();
+    component.stopDrawing(mockEvent);
+    expect(putImageDataSpy).toHaveBeenCalled();
+    expect(beginPathSpy).toHaveBeenCalled();
+    expect(moveToSpy).toHaveBeenCalled();
+    expect(lineToSpy).toHaveBeenCalled();
+
+
+  });
+
 });
